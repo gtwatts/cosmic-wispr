@@ -40,6 +40,15 @@ export function byokFileSizeLimit(provider: string): number {
 const CUSTOM_ENDPOINT_INVALID_MESSAGE_KEY =
   "hooks.audioRecording.errorDescriptions.customEndpointInvalid";
 
+const STREAMING_ONLY_PROVIDER_MESSAGE_KEY =
+  "hooks.audioRecording.errorDescriptions.streamingOnlyProvider";
+
+// Deepgram and AssemblyAI have no OpenAI-compatible /audio/transcriptions, so
+// they exist only as realtime providers. A batch/upload/retry request for them
+// has to fail closed: the fall-through at the end of resolveTranscriptionRoute
+// would otherwise POST the user's audio to api.openai.com with their OpenAI key.
+export const STREAMING_ONLY_PROVIDERS = new Set(["deepgram", "assemblyai"]);
+
 export interface TranscriptionRouteSettings {
   transcriptionMode?: string;
   useLocalWhisper?: boolean;
@@ -133,7 +142,10 @@ export function resolveByokModel(provider: string, configuredModel?: string): st
       (provider === "openai" && (trimmed.startsWith("gpt-4o") || trimmed === "whisper-1")) ||
       (provider === "mistral" && trimmed.startsWith("voxtral-")) ||
       (provider === "corti" && trimmed.startsWith("corti-")) ||
-      (provider === "gemini" && trimmed.startsWith("gemini-"));
+      (provider === "gemini" && trimmed.startsWith("gemini-")) ||
+      (provider === "deepgram" && (trimmed.startsWith("nova-") || trimmed.startsWith("flux-"))) ||
+      (provider === "assemblyai" &&
+        (trimmed.startsWith("universal-") || trimmed.startsWith("slam-")));
     if (matchesProvider) return trimmed;
   }
   if (provider === "groq") return "whisper-large-v3-turbo";
@@ -141,6 +153,8 @@ export function resolveByokModel(provider: string, configuredModel?: string): st
   if (provider === "mistral") return "voxtral-mini-latest";
   if (provider === "corti") return "corti-transcribe";
   if (provider === "gemini") return "gemini-3.5-transcribe";
+  if (provider === "deepgram") return "nova-3";
+  if (provider === "assemblyai") return "universal-streaming-english";
   return "gpt-4o-mini-transcribe";
 }
 
@@ -303,6 +317,14 @@ export function resolveTranscriptionRoute({
       sizeCapBytes: BYOK_FILE_SIZE_LIMIT,
       language,
     };
+  }
+
+  if (STREAMING_ONLY_PROVIDERS.has(provider)) {
+    return error(
+      "This provider only supports live transcription. Choose another provider for file uploads and retries.",
+      "STREAMING_ONLY_PROVIDER",
+      STREAMING_ONLY_PROVIDER_MESSAGE_KEY
+    );
   }
 
   const isGroq = provider === "groq";

@@ -873,7 +873,8 @@
         "chunkLoss": "ネットワークの問題で録音の大部分が失われました。履歴から再文字起こししてください。",
         "agentReasoningFailed": "音声アシスタントがコマンドを処理できなかったため、未処理の文字起こしを挿入しました。",
         "screenContextSkipped": "スクリーンショットを送信できなかったため、画面コンテキストなしでコマンドを実行しました。",
-        "customEndpointInvalid": "カスタム文字起こしエンドポイントが未設定か、URLが無効です。設定 → 音声テキスト変換 から更新してください。"
+        "customEndpointInvalid": "カスタム文字起こしエンドポイントが未設定か、URLが無効です。設定 → 音声テキスト変換 から更新してください。",
+        "streamingOnlyProvider": "このプロバイダーはライブ文字起こしのみに対応しています。ファイルのアップロードや再実行には別のプロバイダーを選択してください。"
       },
       "translationFallback": {
         "unreachableTitle": "翻訳を利用できません",
@@ -2486,7 +2487,10 @@
         "gemini_3_5_transcribe_live": "リアルタイムストリーミング文字起こし",
         "corti_transcribe": "臨床グレードの医療文字起こし",
         "xai_grok_stt": "xAIによる高精度音声認識",
-        "tinfoil_voxtral": "検証可能なプライベート文字起こし"
+        "tinfoil_voxtral": "検証可能なプライベート文字起こし",
+        "deepgram_nova_3": "Deepgram で最も高精度なリアルタイムモデル",
+        "assemblyai_universal_streaming_english": "変化しないリアルタイム文字起こし（英語）",
+        "assemblyai_universal_streaming_multilingual": "変化しないリアルタイム文字起こし（多言語）"
       },
       "cloud": {
         "openai_gpt_5_2": "強力な推論モデル",

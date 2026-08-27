@@ -873,7 +873,8 @@
         "chunkLoss": "A network problem lost too much of the recording. Re-transcribe it from History.",
         "agentReasoningFailed": "Your voice assistant couldn't process the command — the raw transcript was inserted instead.",
         "screenContextSkipped": "The screenshot couldn't be sent, so your command ran without screen context.",
-        "customEndpointInvalid": "Your custom transcription endpoint is not configured or its URL is invalid. Update it in Settings → Speech to Text."
+        "customEndpointInvalid": "Your custom transcription endpoint is not configured or its URL is invalid. Update it in Settings → Speech to Text.",
+        "streamingOnlyProvider": "This provider only supports live transcription. Choose another provider for file uploads and retries."
       },
       "translationFallback": {
         "unreachableTitle": "Translation unavailable",
@@ -2579,7 +2580,10 @@
         "gemini_3_5_transcribe_live": "Realtime streaming speech-to-text",
         "corti_transcribe": "Clinical-grade medical transcription",
         "xai_grok_stt": "High-accuracy speech recognition by xAI",
-        "tinfoil_voxtral": "Verifiably private transcription"
+        "tinfoil_voxtral": "Verifiably private transcription",
+        "deepgram_nova_3": "Deepgram's most accurate realtime model",
+        "assemblyai_universal_streaming_english": "Immutable realtime transcripts, English",
+        "assemblyai_universal_streaming_multilingual": "Immutable realtime transcripts, multilingual"
       },
       "cloud": {
         "openai_gpt_5_2": "Strong reasoning model",
