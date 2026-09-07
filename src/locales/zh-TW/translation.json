@@ -874,7 +874,8 @@
         "agentReasoningFailed": "語音助理無法處理該指令，已改為插入原始逐字稿。",
         "screenContextSkipped": "截圖無法傳送，因此已在沒有螢幕內容的情況下執行你的指令。",
         "customEndpointInvalid": "自訂轉錄端點未設定或其 URL 無效。請在「設定 → 語音轉文字」中更新。",
-        "streamingOnlyProvider": "此服務商僅支援即時轉錄。請為檔案上傳與重試選擇其他服務商。"
+        "streamingOnlyProvider": "此服務商僅支援即時轉錄。請為檔案上傳與重試選擇其他服務商。",
+        "providerKeyMissing": "尚未為您的轉錄服務商設定 API 金鑰。請在「設定 → 語音轉文字」中新增。"
       },
       "translationFallback": {
         "unreachableTitle": "翻譯無法使用",
@@ -2935,7 +2936,8 @@
       "queueFailed": "{{n}} 個失敗",
       "urlFileTooLarge": "檔案過大，無法下載。大小上限為 500 MB。",
       "urlYoutubeBlocked": "YouTube 暫時封鎖了來自您網路的下載。請稍後再試。",
-      "customEndpointInvalid": "自訂轉錄端點未設定或無效。請在設定中更新。"
+      "customEndpointInvalid": "自訂轉錄端點未設定或無效。請在設定中更新。",
+      "streamingOnlyProvider": "此服務商僅支援即時轉錄。請為檔案上傳與重試選擇其他服務商。"
     },
     "meeting": {
       "title": "會議筆記",
@@ -3362,7 +3364,8 @@
       "transcribing": "正在轉錄...",
       "thinking": "正在思考...",
       "typeMessage": "輸入訊息...",
-      "send": "傳送"
+      "send": "傳送",
+      "voiceDraftStreamingOnly": "目前的轉錄服務商僅支援即時聽寫，因此無法使用語音輸入。請在「設定 → 語音轉文字」中選擇其他服務商。"
     },
     "tools": {
       "search_notesName": "搜尋筆記",
