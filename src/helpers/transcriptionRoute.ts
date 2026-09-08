@@ -159,7 +159,10 @@ export function resolveByokModel(provider: string, configuredModel?: string): st
   if (trimmed) {
     const matchesProvider =
       (provider === "groq" && trimmed.startsWith("whisper-large-v3")) ||
-      (provider === "openai" && (trimmed.startsWith("gpt-4o") || trimmed === "whisper-1")) ||
+      (provider === "openai" &&
+        (trimmed.startsWith("gpt-transcribe") ||
+          trimmed.startsWith("gpt-4o") ||
+          trimmed === "whisper-1")) ||
       (provider === "mistral" && trimmed.startsWith("voxtral-")) ||
       (provider === "corti" && trimmed.startsWith("corti-")) ||
       (provider === "gemini" && trimmed.startsWith("gemini-"));
@@ -170,7 +173,7 @@ export function resolveByokModel(provider: string, configuredModel?: string): st
   if (provider === "mistral") return "voxtral-mini-latest";
   if (provider === "corti") return "corti-transcribe";
   if (provider === "gemini") return "gemini-3.5-transcribe";
-  return "gpt-4o-mini-transcribe";
+  return "gpt-transcribe";
 }
 
 function error(message: string, code?: string, messageKey?: string): TranscriptionRoute {
