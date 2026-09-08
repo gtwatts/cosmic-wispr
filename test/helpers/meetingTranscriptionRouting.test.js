@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const load = () => import("../../src/helpers/meetingTranscriptionRouting.js");
+const modelRegistryData = require("../../src/models/modelRegistryData.json");
 
 const byokProviders = [
   {
@@ -160,6 +161,48 @@ test("unknown and custom providers fail closed", async () => {
           selectedProvider,
         }),
       /Unsupported Note Recording provider/
+    );
+  }
+});
+
+// gpt-live-transcribe has no server VAD and only completes a turn when the client
+// commits, which dictation does on stop and a long-running meeting stream never
+// does. Until that guard exists, the desktop must not be able to route a meeting
+// onto it: no registry entry, and a stale selection falls back to the default.
+test("gpt-live-transcribe is never offered for Note Recording", async () => {
+  const { resolveMeetingTranscriptionOptions } = await load();
+  // Mirrors getStreamingTranscriptionProviders(): the meeting BYOK picker.
+  const registryStreamingProviders = modelRegistryData.transcriptionProviders
+    .map((provider) => ({ ...provider, models: provider.models.filter((m) => m.streaming) }))
+    .filter((provider) => provider.models.length > 0);
+  for (const provider of registryStreamingProviders) {
+    for (const model of provider.models) {
+      assert.equal(model.id.startsWith("gpt-live-transcribe"), false, model.id);
+    }
+  }
+
+  assert.equal(
+    resolveMeetingTranscriptionOptions({
+      ...baseOptions,
+      selectedProvider: "openai",
+      selectedModel: "gpt-live-transcribe",
+      byokProviders: registryStreamingProviders,
+    }).model,
+    "gpt-4o-mini-transcribe"
+  );
+  const managedCatalogs = [
+    null,
+    [{ id: "openai", models: [{ id: "gpt-4o-mini-transcribe", default: true }] }],
+  ];
+  for (const managedProviders of managedCatalogs) {
+    assert.equal(
+      resolveMeetingTranscriptionOptions({
+        ...baseOptions,
+        transcriptionMode: "openwhispr",
+        managedProviders,
+        selectedModel: "gpt-live-transcribe",
+      }).model,
+      "gpt-4o-mini-transcribe"
     );
   }
 });
