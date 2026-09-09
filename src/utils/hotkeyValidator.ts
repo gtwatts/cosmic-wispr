@@ -306,11 +306,14 @@ const WINDOWS_RECOMMENDED = [
   "Modifier + rarely used key (e.g., Ctrl + Page Up)",
 ] as const;
 
+// Every entry must contain a regular key. GNOME, KDE and Hyprland cannot report
+// a release for a modifier-only combo, so recommending one silently costs the
+// user Hold — and the GlobalShortcuts portal cannot tell a left modifier from a
+// right one, which rules out the bare right-side suggestion too.
 const LINUX_RECOMMENDED = [
-  "Ctrl + Super",
-  "Ctrl + Shift + Super",
-  "Super + Shift",
-  "Ctrl (right) or Alt (right)",
+  "Ctrl + Super + Space",
+  "Ctrl + Shift + K",
+  "Super + Shift + R",
   "Modifier + rarely used key (e.g., Ctrl + Page Up or Ctrl + Scroll Lock)",
 ] as const;
 
