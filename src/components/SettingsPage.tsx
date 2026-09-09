@@ -3971,7 +3971,11 @@ EOF`,
 
                 {(!isUsingNativeShortcut || getCachedPlatform() === "linux") && (
                   <SettingsPanelRow>
-                    <HotkeyGestureRows slot="dictation" hotkey={dictationKey} mode={activationMode} />
+                    <HotkeyGestureRows
+                      slot="dictation"
+                      hotkey={dictationKey}
+                      mode={activationMode}
+                    />
                     {getCachedPlatform() === "linux" && activationMode === "push" && (
                       <LinuxPttSetupInfo isAvailable={linuxPttAvailable} />
                     )}
