@@ -3757,7 +3757,7 @@ class IPCHandlers {
 
       // These caches are not owned by one account. Remove them only through
       // the explicit device-erasure path, never during normal account deletion.
-      const homeCacheRoot = path.join(os.homedir(), ".cache", "openwhispr");
+      const homeCacheRoot = path.join(os.homedir(), ".cache", "cosmic-wispr");
       for (const cacheName of ["embedding-models", "qdrant-data", "qdrant-data-dev", "yt-dlp"]) {
         try {
           fs.rmSync(path.join(homeCacheRoot, cacheName), { recursive: true, force: true });
@@ -3923,6 +3923,12 @@ class IPCHandlers {
         }
 
         // On GNOME, unregister all native keybindings during capture
+        if (hotkeyManager.cosmicManager) {
+          for (const slot of [...hotkeyManager.cosmicManager.callbacks.keys()]) {
+            hotkeyManager.cosmicManager.unregister(slot);
+          }
+        }
+
         if (hotkeyManager.isUsingGnome() && hotkeyManager.gnomeManager) {
           await hotkeyManager.gnomeManager.unregisterPushToTalk();
           for (const slot of [...hotkeyManager.gnomeManager.registeredSlots]) {
@@ -3945,10 +3951,7 @@ class IPCHandlers {
       } else {
         // Exiting capture mode - re-register globalShortcut if not already registered
         // Skip for KDE/GNOME/Hyprland — updateHotkey handles re-registration via native path
-        const usesNativePath =
-          hotkeyManager.isUsingKDE() ||
-          hotkeyManager.isUsingGnome() ||
-          hotkeyManager.isUsingHyprland();
+        const usesNativePath = hotkeyManager.isUsingNativeShortcut();
         if (!usesNativePath) {
           const { globalShortcut } = require("electron");
           // Re-register every globalShortcut-backed dictation hotkey (the slot
@@ -3976,6 +3979,15 @@ class IPCHandlers {
         this.windowManager.reconcileNativeKeyListeners();
 
         // On GNOME, re-register the keybinding with the effective hotkey
+        if (hotkeyManager.cosmicManager && effectiveHotkey) {
+          const result = await hotkeyManager.registerSlot(
+            "dictation",
+            effectiveHotkey,
+            this.windowManager.createHotkeyCallback()
+          );
+          if (!result.success) throw new Error(result.error);
+        }
+
         if (hotkeyManager.isUsingGnome() && hotkeyManager.gnomeManager && effectiveHotkey) {
           debugLogger.log(
             `[IPC] Re-registering GNOME keybinding "${effectiveHotkey}" after capture mode`

@@ -318,7 +318,7 @@ export default function SetupChoiceStep({
                     which was not exported) — on plain white that would be
                     invisible, so it takes the brand fill until the art lands. */}
                 <span className="rounded-[47px] bg-[var(--onboarding-accent)] px-[9px] py-1 text-[10px] leading-[1.4] text-[var(--onboarding-accent-foreground)]">
-                  {t("common.recommended")}
+                  Optional cloud service
                 </span>
               </div>
 

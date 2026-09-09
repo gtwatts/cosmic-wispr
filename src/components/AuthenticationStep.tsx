@@ -13,7 +13,7 @@ import {
 import { discoverEmailAuth } from "../lib/emailAuthDiscovery";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { AlertCircle, ArrowRight, Building2, Check, Loader2, ChevronLeft } from "lucide-react";
+import { AlertCircle, ArrowRight, Building2, Check, Loader2, ChevronLeft, Mic } from "lucide-react";
 import logger from "../utils/logger";
 import { getCachedPlatform } from "../utils/platform";
 import ForgotPasswordView from "./ForgotPasswordView";
@@ -25,6 +25,7 @@ interface AuthenticationStepProps {
   onNeedsVerification: (email: string) => void;
   /** Rendering inside SignInDialog rather than the onboarding window. */
   embedded?: boolean;
+  cosmicWelcome?: boolean;
 }
 
 type AuthMode = "sign-in" | "sign-up" | null;
@@ -124,6 +125,7 @@ export default function AuthenticationStep({
   onAuthComplete,
   onNeedsVerification,
   embedded = false,
+  cosmicWelcome = false,
 }: AuthenticationStepProps) {
   const { t } = useTranslation();
   // The fixed top offsets centre content in the compact setup window;
@@ -145,6 +147,7 @@ export default function AuthenticationStep({
   const [error, setError] = useState<string | null>(null);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [oauthProtocolRegistered, setOauthProtocolRegistered] = useState(true);
+  const [showCloudSignIn, setShowCloudSignIn] = useState(false);
   const isMacOS = getCachedPlatform() === "darwin";
 
   const needsVerificationRef = useRef(false);
@@ -651,6 +654,39 @@ export default function AuthenticationStep({
     },
     { id: "sso", label: "SSO", icon: Building2, onClick: handleSSOSignIn, loading: isSSOLoading },
   ];
+
+  if (cosmicWelcome && !embedded && !showCloudSignIn && onContinueWithoutAccount) {
+    return (
+      <CompactOnboardingFrame showBrandMark={false} showLegalNotice={false}>
+        <div className={`${frameInset("pt-32")} text-center`}>
+          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-violet-500/15 text-violet-400">
+            <Mic className="size-8" aria-hidden="true" />
+          </div>
+          <h1 className={titleClass}>Cosmic Wispr</h1>
+          <p className="mt-3 text-lg text-[var(--onboarding-text-primary)]">
+            Your voice, wherever you work.
+          </p>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-[var(--onboarding-text-secondary)]">
+            Speak a thought. Turn it into clear writing. Paste it into the app you are using. Local
+            speech and AI models keep processing on this workstation.
+          </p>
+          <Button onClick={onContinueWithoutAccount} className="mt-7 h-12 w-full rounded-full">
+            Set up Cosmic Wispr <ArrowRight className="ml-2 size-4" />
+          </Button>
+          <p className="mt-3 text-xs text-[var(--onboarding-text-secondary)]">
+            No account required. Cloud providers are optional.
+          </p>
+          <Button
+            variant="ghost"
+            onClick={() => setShowCloudSignIn(true)}
+            className="mt-5 text-xs text-muted-foreground"
+          >
+            Connect an existing OpenWhispr account
+          </Button>
+        </div>
+      </CompactOnboardingFrame>
+    );
+  }
 
   return (
     <CompactOnboardingFrame embedded={embedded}>

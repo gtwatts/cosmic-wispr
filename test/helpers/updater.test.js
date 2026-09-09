@@ -37,7 +37,7 @@ function makeAutoUpdater({ offline = false } = {}) {
 
 // updater.js requires electron and child_process lazily (constructor, cleanup(),
 // Rosetta probe), so the mocks stay installed until afterEach.
-function createUpdateManager(autoUpdater) {
+function createUpdateManager(autoUpdater, enableTestFeed = true) {
   delete require.cache[updaterModulePath];
   Module._load = function loadWithMocks(request, parent, isMain) {
     if (request === "electron-updater") return { autoUpdater };
@@ -46,8 +46,30 @@ function createUpdateManager(autoUpdater) {
     return originalLoad.call(this, request, parent, isMain);
   };
   const UpdateManager = require(updaterModulePath);
-  return new UpdateManager();
+  const manager = new UpdateManager();
+  // Exercise the retained update preference machinery with a mock feed.
+  // Shipping Cosmic Wispr deliberately has no configured release feed.
+  if (enableTestFeed) {
+    manager.updatesEnabled = true;
+    manager.setupAutoUpdater();
+  }
+  return manager;
 }
+
+test("Cosmic Wispr never checks, downloads or installs upstream releases", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "setInterval"] });
+  const autoUpdater = makeAutoUpdater();
+  const manager = createUpdateManager(autoUpdater, false);
+  manager.checkForUpdatesOnStartup();
+  t.mock.timers.tick(PERIODIC_INTERVAL_MS);
+  assert.equal(autoUpdater.calls, 0);
+  assert.equal((await manager.checkForUpdates()).updateAvailable, false);
+  assert.equal((await manager.downloadUpdate()).success, false);
+  assert.equal((await manager.installUpdate()).success, false);
+  assert.equal(autoUpdater.calls, 0);
+  assert.deepEqual(autoUpdater.listeners, {});
+  manager.cleanup();
+});
 
 function makeRendererWindow(sent) {
   return {

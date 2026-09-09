@@ -63,7 +63,7 @@ const clipboardModulePath = require.resolve("../../src/helpers/clipboard");
 
 const originalLoad = Module._load;
 
-function loadClipboardManager({ spawn } = {}) {
+function loadClipboardManager({ spawn, spawnSync } = {}) {
   delete require.cache[clipboardModulePath];
 
   Module._load = function loadWithMocks(request, parent, isMain) {
@@ -75,8 +75,8 @@ function loadClipboardManager({ spawn } = {}) {
         },
       };
     }
-    if (request === "child_process" && spawn) {
-      return { ...childProcess, spawn };
+    if (request === "child_process" && (spawn || spawnSync)) {
+      return { ...childProcess, ...(spawn ? { spawn } : {}), ...(spawnSync ? { spawnSync } : {}) };
     }
     return originalLoad.call(this, request, parent, isMain);
   };
@@ -813,4 +813,30 @@ test("terminal detection matches window classes and macOS app names alike", () =
   assert.equal(manager.isLinuxTerminalWindowClass("konsole"), true);
   assert.equal(manager.isLinuxTerminalWindowClass("org.mozilla.firefox"), false);
   assert.equal(manager.isLinuxTerminalWindowClass(null), false);
+});
+
+test("COSMIC preserves the native clipboard owner for both paste selections", async () => {
+  resetClipboard({ text: "before" });
+  const calls = [];
+  const Manager = loadClipboardManager({
+    spawnSync(command, args, options) {
+      calls.push({ command, args, options });
+      return { status: 0 };
+    },
+  });
+  const manager = new Manager();
+  manager.commandExists = (command) => command === "wl-copy";
+  await withWaylandEnvironment("COSMIC", () => {
+    manager._writeClipboardWayland("dictated text");
+    manager._writePrimarySelection("dictated text");
+  });
+  assert.equal(calls.length, 2);
+  for (const call of calls) {
+    assert.equal(call.command, "wl-copy");
+    assert.equal(call.options.input, "dictated text");
+    assert.deepEqual(call.options.stdio, ["pipe", "ignore", "ignore"]);
+    assert.ok(!call.args.includes("dictated text"));
+  }
+  assert.ok(calls[1].args.includes("--primary"));
+  assert.deepEqual(fakeClipboard.writes, []);
 });

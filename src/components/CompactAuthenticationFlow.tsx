@@ -6,11 +6,13 @@ import EmailVerificationStep from "./EmailVerificationStep";
 interface CompactAuthenticationFlowProps {
   onContinueWithoutAccount?: () => void;
   onAuthComplete: () => void;
+  cosmicWelcome?: boolean;
 }
 
 export function CompactAuthenticationFlow({
   onContinueWithoutAccount,
   onAuthComplete,
+  cosmicWelcome = false,
 }: CompactAuthenticationFlowProps): JSX.Element {
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
 
@@ -33,6 +35,7 @@ export function CompactAuthenticationFlow({
 
   return (
     <AuthenticationStep
+      cosmicWelcome={cosmicWelcome}
       onContinueWithoutAccount={onContinueWithoutAccount}
       onAuthComplete={onAuthComplete}
       onNeedsVerification={setPendingVerificationEmail}

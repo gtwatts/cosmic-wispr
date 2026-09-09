@@ -77,7 +77,8 @@ export default function ControlPanelSidebar({
   );
 
   const showLimitBanner = upsell === "show" && Boolean(isSignedIn) && Boolean(isOverLimit);
-  const showUpgradeBanner = upsell === "show" && !showLimitBanner && !upgradeDismissed;
+  const showUpgradeBanner =
+    upsell === "show" && Boolean(isSignedIn) && !showLimitBanner && !upgradeDismissed;
 
   const agentAllowed = usePolicyStore(isAgentAllowed);
   const policyActionsAllowed = usePolicyStore((state) => isPolicyActionAllowed(state));

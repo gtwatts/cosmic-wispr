@@ -15,9 +15,13 @@ function resolveOverlayWindowType({ role, platform, linuxSession }) {
   if (platform === "darwin") return "panel";
   if (platform !== "linux") return "normal";
 
-  // Sway asks wlroots whether an unmanaged XWayland surface wants focus.
-  // "toolbar" opts in; "notification" keeps the existing text field focused.
-  if (linuxSession.isSway && linuxSession.xwaylandAvailable && FOCUSLESS_OVERLAY_ROLES.has(role)) {
+  // Sway and COSMIC focus XWayland toolbar surfaces even with focusable:false.
+  // Notification surfaces let recording appear without stealing the paste target.
+  if (
+    (linuxSession.isSway || linuxSession.isCosmic) &&
+    linuxSession.xwaylandAvailable &&
+    FOCUSLESS_OVERLAY_ROLES.has(role)
+  ) {
     return "notification";
   }
 

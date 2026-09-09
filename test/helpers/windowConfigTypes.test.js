@@ -41,6 +41,17 @@ function loadWindowConfig({ platform, environment }) {
 
 const OVERLAY_ROLES = ["main", "notification"];
 
+test("COSMIC recording overlays preserve focus in the destination application", () => {
+  const config = loadWindowConfig({
+    platform: "linux",
+    environment: { XDG_CURRENT_DESKTOP: "COSMIC", WAYLAND_DISPLAY: "wayland-1", DISPLAY: ":1" },
+  });
+  assert.equal(config.MAIN_WINDOW_CONFIG.type, "notification");
+  assert.equal(config.MAIN_WINDOW_CONFIG.focusable, false);
+  assert.equal(config.NOTIFICATION_WINDOW_CONFIG.type, "notification");
+  assert.notEqual(config.CONTROL_PANEL_CONFIG.type, "notification");
+});
+
 function resolveAllOverlayTypes(platform, session) {
   return Object.fromEntries(
     OVERLAY_ROLES.map((role) => [

@@ -647,6 +647,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         return (
           <div className="min-h-full w-full">
             <CompactAuthenticationFlow
+              cosmicWelcome={session.setupMode !== "cloud"}
               onContinueWithoutAccount={() => {
                 // Guests continue onto their route's permissions step — jumping
                 // straight to setup-choice would skip the permission grants and

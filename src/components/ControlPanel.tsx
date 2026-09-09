@@ -1271,6 +1271,11 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
                 <PanelLeftClose size={15} className={toggleIconClass} />
               )}
             </button>
+            {!sidebarCollapsed && (
+              <span className="ml-2 text-xs font-semibold tracking-tight text-foreground/80">
+                Cosmic Wispr
+              </span>
+            )}
           </div>
         )}
       </div>

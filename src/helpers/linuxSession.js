@@ -14,7 +14,14 @@ function getLinuxSessionInfo(environment = process.env) {
     .toLowerCase();
   const isGnome = isWayland && desktopEnv.includes("gnome");
   const isKde = isWayland && desktopEnv.includes("kde");
-  const isHyprland = isWayland && !!environment.HYPRLAND_INSTANCE_SIGNATURE;
+  const currentDesktop = (
+    environment.XDG_CURRENT_DESKTOP ||
+    environment.XDG_SESSION_DESKTOP ||
+    environment.DESKTOP_SESSION ||
+    ""
+  ).toLowerCase();
+  const isCosmic = isWayland && currentDesktop.split(":").includes("cosmic");
+  const isHyprland = isWayland && !isCosmic && !!environment.HYPRLAND_INSTANCE_SIGNATURE;
   // SWAYSOCK can survive a compositor switch, so trust it only when no desktop
   // metadata identifies the current session.
   const isSway =
@@ -25,6 +32,7 @@ function getLinuxSessionInfo(environment = process.env) {
     (desktopEnv.includes("sway") || (!desktopEnv && !!environment.SWAYSOCK));
   const isWlroots =
     isWayland &&
+    !isCosmic &&
     (WLROOTS_DESKTOPS.some((desktop) => desktopEnv.includes(desktop)) ||
       !!environment.SWAYSOCK ||
       !!environment.HYPRLAND_INSTANCE_SIGNATURE);
@@ -35,6 +43,7 @@ function getLinuxSessionInfo(environment = process.env) {
     desktopEnv,
     isGnome,
     isKde,
+    isCosmic,
     isWlroots,
     isHyprland,
     isSway,

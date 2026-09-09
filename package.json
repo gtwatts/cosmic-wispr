@@ -1,7 +1,7 @@
 {
-  "name": "open-whispr",
-  "version": "1.10.0",
-  "description": "A desktop dictation application using whisper.cpp for speech-to-text transcription",
+  "name": "cosmic-wispr",
+  "version": "0.1.0",
+  "description": "Local-first AI voice dictation for the COSMIC desktop",
   "main": "main.js",
   "private": true,
   "engines": {
@@ -78,7 +78,10 @@
     "quality-check": "npm run format:check && npm run typecheck",
     "i18n:check": "node scripts/check-i18n.js",
     "preview": "cd src && vite preview",
-    "clean": "node cleanup.js"
+    "clean": "node cleanup.js",
+    "start:cosmic": "node scripts/start-cosmic.js",
+    "install:cosmic": "node scripts/install-cosmic.js",
+    "test:desktop": "node scripts/test-desktop.js"
   },
   "keywords": [
     "dictation",
@@ -220,5 +223,6 @@
     "ip-address": "10.2.0",
     "markdown-it": "14.2.0",
     "tmp": "0.2.7"
-  }
+  },
+  "productName": "Cosmic Wispr"
 }

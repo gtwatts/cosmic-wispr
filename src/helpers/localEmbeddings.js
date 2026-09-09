@@ -16,7 +16,7 @@ class LocalEmbeddings {
     const cacheDir = path.join(
       os.homedir(),
       ".cache",
-      "openwhispr",
+      "cosmic-wispr",
       "embedding-models",
       MODEL_SUBDIR
     );

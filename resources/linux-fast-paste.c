@@ -642,6 +642,16 @@ static int paste_via_uinput(paste_mode_t mode, int copy_mode) {
         return 4;
     }
 
+    /* Advertise a full keyboard so udev/libinput classifies this device as a
+     * keyboard. A device with only modifier and paste keys is ignored by
+     * COSMIC even though uinput accepts its events. */
+    for (int key = KEY_ESC; key <= KEY_SPACE; key++) {
+        if (ioctl(fd, UI_SET_KEYBIT, key) < 0) {
+            close(fd);
+            return 4;
+        }
+    }
+
     struct uinput_setup usetup;
     memset(&usetup, 0, sizeof(usetup));
     usetup.id.bustype = BUS_USB;
@@ -655,7 +665,9 @@ static int paste_via_uinput(paste_mode_t mode, int copy_mode) {
         return 4;
     }
 
-    usleep(50000);
+    /* COSMIC needs time to discover a newly created keyboard. Sending before
+     * libinput adds it silently drops the paste despite successful writes. */
+    usleep(500000);
 
     if (!copy_mode && mode == PASTE_MODE_SHIFT_INSERT) {
         emit_key(fd, KEY_LEFTSHIFT, 1);
@@ -680,7 +692,7 @@ static int paste_via_uinput(paste_mode_t mode, int copy_mode) {
         emit_key(fd, KEY_LEFTCTRL, 0);
     }
 
-    usleep(20000);
+    usleep(100000);
 
     ioctl(fd, UI_DEV_DESTROY);
     close(fd);

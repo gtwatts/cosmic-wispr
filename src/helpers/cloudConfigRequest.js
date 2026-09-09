@@ -11,7 +11,9 @@ function createCloudConfigRequestHandler({
   return async function handleCloudConfigRequest(event) {
     try {
       const apiUrl = getApiUrl();
-      if (!apiUrl) throw new Error("OpenWhispr API URL not configured");
+      if (!apiUrl) {
+        return { success: false, code: "NOT_CONFIGURED", error: "Cloud service is not configured" };
+      }
 
       const authHeader = await getAuthHeader(event);
       if (!Object.keys(authHeader).length) throw new Error("Not authenticated");

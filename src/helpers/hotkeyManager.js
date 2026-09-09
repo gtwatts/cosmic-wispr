@@ -4,6 +4,7 @@ const debugLogger = require("./debugLogger");
 const GnomeShortcutManager = require("./gnomeShortcut");
 const HyprlandShortcutManager = require("./hyprlandShortcut");
 const KDEShortcutManager = require("./kdeShortcut");
+const { CosmicShortcutManager } = require("./cosmicShortcut");
 const { i18nMain } = require("./i18nMain");
 const { parseHotkeyList } = require("./hotkeyList");
 
@@ -88,7 +89,7 @@ class HotkeyManager extends EventEmitter {
     // Each slot holds a list of hotkeys (#936). `accelerators` mirrors `hotkeys`
     // index-for-index (null for native-listener entries).
     this.slots = new Map();
-    const defaultDictation = process.platform === "darwin" ? "GLOBE" : "Control+Super";
+    const defaultDictation = this.getEffectiveDefaultHotkey();
     this.slots.set("dictation", { hotkeys: [defaultDictation], callback: null, accelerators: [] });
     this.isInitialized = false;
     this.isListeningMode = false;
@@ -98,6 +99,7 @@ class HotkeyManager extends EventEmitter {
     this.useHyprland = false;
     this.kdeManager = null;
     this.useKDE = false;
+    this.cosmicManager = null;
   }
 
   // Ensure a slot exists and return it (slots always use the list shape).
@@ -186,6 +188,23 @@ class HotkeyManager extends EventEmitter {
 
   async registerSlot(slotName, hotkeyInput, callback, options) {
     const hotkeys = parseHotkeyList(hotkeyInput);
+    if (this.cosmicManager && slotName !== "cancel") {
+      if (hotkeys.length !== 1) {
+        return { success: false, error: "Choose one shortcut per action on COSMIC." };
+      }
+      try {
+        this.cosmicManager.register(slotName, hotkeys[0], () => {
+          if (!this.isListeningMode) callback(hotkeys[0]);
+        });
+        const slot = this._ensureSlot(slotName);
+        slot.hotkeys = hotkeys;
+        slot.callback = callback;
+        slot.accelerators = [];
+        return { success: true, hotkey: hotkeys[0] };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    }
     if (hotkeys.length === 0) {
       return {
         success: false,
@@ -298,6 +317,12 @@ class HotkeyManager extends EventEmitter {
   unregisterSlot(slotName) {
     const slot = this.slots.get(slotName);
     if (!slot || !(slot.hotkeys?.length || slot.accelerators?.length)) return;
+    if (this.cosmicManager && slotName !== "cancel") {
+      this.cosmicManager.unregister(slotName);
+      slot.hotkeys = [];
+      slot.accelerators = [];
+      return;
+    }
 
     // On KDE (X11 or Wayland), persistent slots are managed via KGlobalAccel
     if (this.useKDE && this.kdeManager && slotName !== "cancel") {
@@ -387,6 +412,7 @@ class HotkeyManager extends EventEmitter {
   }
 
   supportsPushToTalk(hotkey = this.currentHotkey) {
+    if (this.cosmicManager) return false;
     if (this.isUsingNativeShortcut() && isModifierOnlyHotkey(hotkey)) {
       return false;
     }
@@ -397,6 +423,8 @@ class HotkeyManager extends EventEmitter {
   }
 
   getPushToTalkUnavailableReason(hotkey = this.currentHotkey) {
+    if (this.cosmicManager)
+      return "On COSMIC, press the shortcut to start and press again to finish.";
     if (this.isUsingNativeShortcut() && isModifierOnlyHotkey(hotkey)) {
       return i18nMain.t("hotkey.errors.osReserved", { hotkey });
     }
@@ -846,6 +874,22 @@ class HotkeyManager extends EventEmitter {
     this.mainWindow = mainWindow;
     this.hotkeyCallback = callback;
 
+    if (CosmicShortcutManager.isCosmic()) {
+      this.cosmicManager = new CosmicShortcutManager();
+      try {
+        await this.cosmicManager.init();
+        const hotkey = parseHotkeyList(await this.getSavedHotkey())[0];
+        const result = await this.registerSlot("dictation", hotkey, callback);
+        if (!result.success) throw new Error(result.error);
+        this.notifyActiveHotkey(hotkey);
+      } catch (error) {
+        debugLogger.warn("COSMIC shortcut setup failed", { error: error.message });
+        this.notifyHotkeyFailure(this.currentHotkey, { error: error.message });
+      }
+      this.isInitialized = true;
+      return;
+    }
+
     // Try GNOME native shortcuts on any GNOME session (X11 or Wayland).
     // On Wayland: required (globalShortcut/XGrabKey doesn't work globally).
     // On X11: provides conflict detection via gsettings, visible in GNOME Settings.
@@ -1168,7 +1212,7 @@ class HotkeyManager extends EventEmitter {
       debugLogger.log("[HotkeyManager] Failed to read dictationKey from .env:", err.message);
     }
 
-    return DEFAULT_HOTKEY;
+    return this.getEffectiveDefaultHotkey();
   }
 
   /**
@@ -1177,6 +1221,7 @@ class HotkeyManager extends EventEmitter {
    * GNOME gsettings requires a regular key), returns the first fallback (F8).
    */
   getEffectiveDefaultHotkey() {
+    if (CosmicShortcutManager.isCosmic()) return "Control+Alt+Space";
     if (process.platform === "darwin") return "GLOBE";
     if (process.platform !== "linux") return DEFAULT_HOTKEY;
 
@@ -1272,6 +1317,14 @@ class HotkeyManager extends EventEmitter {
       const hotkeyStr = hotkeys.join(",");
       // DE backends bind one accelerator per slot; extras stay in storage.
       const primary = hotkeys[0];
+
+      if (this.cosmicManager) {
+        const result = await this.registerSlot("dictation", hotkeys, callback);
+        if (!result.success) return { success: false, message: result.error };
+        this.notifyActiveHotkey(primary);
+        await this.saveHotkeyToRenderer(primary);
+        return { success: true, message: `Shortcut updated to ${primary} in COSMIC Settings.` };
+      }
 
       if (this.activationMode === "push" && !this.supportsPushToTalk(primary)) {
         return {
@@ -1408,6 +1461,14 @@ class HotkeyManager extends EventEmitter {
   }
 
   unregisterAll() {
+    if (this.cosmicManager) {
+      try {
+        this.cosmicManager.close();
+      } catch (error) {
+        debugLogger.warn("COSMIC shortcut cleanup failed", { error: error.message });
+      }
+      this.cosmicManager = null;
+    }
     if (this.gnomeManager) {
       // Unregister every slot that was registered via GNOME
       const gnomeSlots = [...this.gnomeManager.registeredSlots];
@@ -1475,7 +1536,7 @@ class HotkeyManager extends EventEmitter {
   }
 
   isUsingNativeShortcut() {
-    return this.useGnome || this.useHyprland || this.useKDE;
+    return this.useGnome || this.useHyprland || this.useKDE || !!this.cosmicManager;
   }
 
   isHotkeyRegistered(hotkey) {

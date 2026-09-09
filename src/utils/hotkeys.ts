@@ -201,7 +201,11 @@ export function isCompoundHotkey(hotkey: string): boolean {
  */
 export function getDefaultHotkey(): string {
   const platform = getPlatform();
-  return platform === "darwin" ? "GLOBE" : "Control+Super";
+  return platform === "darwin"
+    ? "GLOBE"
+    : platform === "linux"
+      ? "Control+Alt+Space"
+      : "Control+Super";
 }
 
 /**

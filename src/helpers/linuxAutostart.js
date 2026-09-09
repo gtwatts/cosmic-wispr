@@ -8,7 +8,7 @@ const DESKTOP_ENTRY_GROUP = "[Desktop Entry]";
 // electron-builder names the packaged desktop entry and icon after the Linux
 // executable, which main.js also passes to app.setDesktopName(). Reusing it here
 // keeps our entry and the packaged one referring to the same icon.
-const LINUX_APP_NAME = "open-whispr";
+const LINUX_APP_NAME = "cosmic-wispr";
 const WRAPPED_BINARY_SUFFIX = "-app";
 const ICON_THEME_SUBPATH = path.join(
   "icons",
@@ -50,6 +50,9 @@ function isDevelopment() {
 //     the user's flags file (see scripts/lib/linux-launcher.js).
 function resolveExecutablePath() {
   if (process.env.APPIMAGE) return process.env.APPIMAGE;
+  if (process.env.COSMIC_WISPR_LAUNCHER && fs.existsSync(process.env.COSMIC_WISPR_LAUNCHER)) {
+    return process.env.COSMIC_WISPR_LAUNCHER;
+  }
 
   if (process.execPath.endsWith(WRAPPED_BINARY_SUFFIX)) {
     const wrapperPath = process.execPath.slice(0, -WRAPPED_BINARY_SUFFIX.length);
@@ -109,7 +112,7 @@ function buildDesktopFileContents(execPath, iconName) {
   return [
     DESKTOP_ENTRY_GROUP,
     "Type=Application",
-    "Name=OpenWhispr",
+    "Name=Cosmic Wispr",
     "Comment=Voice dictation and AI agent",
     `Exec=${buildExecValue(execPath)}`,
     iconName ? `Icon=${iconName}` : null,
@@ -207,6 +210,7 @@ function syncAutostartEntry() {
 }
 
 module.exports = {
+  quoteExecPath,
   getDesktopFilePath,
   resolveExecutablePath,
   buildDesktopFileContents,

@@ -4,7 +4,7 @@ const path = require("path");
 const { app, safeStorage } = require("electron");
 const debugLogger = require("./debugLogger");
 
-const SERVICE = "OpenWhispr";
+const SERVICE = "Cosmic Wispr";
 const ACCOUNT = "secrets-master-key";
 const ALGO = "aes-256-gcm";
 const IV_LEN = 12;
@@ -67,7 +67,7 @@ function _initKeychain() {
       if (key.length !== KEY_LEN) throw new Error("stored key length invalid");
       masterKey = key;
     } else {
-      masterKey = crypto.randomBytes(KEY_LEN);
+      if (!_loadMasterKeyBackup()) masterKey = crypto.randomBytes(KEY_LEN);
       entry.setPassword(masterKey.toString("base64"));
       // Write the safeStorage backup only when the key is first generated.
       // Re-writing on every launch invokes a second Keychain backend on macOS.

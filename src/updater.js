@@ -3,6 +3,7 @@ const { appUpdatesEnabled } = require("./helpers/updateCheckPolicy");
 
 class UpdateManager {
   constructor() {
+    this.updatesEnabled = false; // Enable only after Cosmic Wispr has its own release feed.
     this.updateAvailable = false;
     this.updateDownloaded = false;
     this.lastUpdateInfo = null;
@@ -23,16 +24,9 @@ class UpdateManager {
   }
 
   setupAutoUpdater() {
-    if (process.env.NODE_ENV === "development") {
+    if (!this.updatesEnabled || process.env.NODE_ENV === "development") {
       return;
     }
-
-    autoUpdater.setFeedURL({
-      provider: "github",
-      owner: "OpenWhispr",
-      repo: "openwhispr",
-      private: false,
-    });
 
     // Use arch-specific update channel on macOS to prevent arm64/x64
     // from downloading mismatched artifacts. Both builds publish to the
@@ -162,10 +156,10 @@ class UpdateManager {
 
   async checkForUpdates() {
     try {
-      if (process.env.NODE_ENV === "development") {
+      if (!this.updatesEnabled || process.env.NODE_ENV === "development") {
         return {
           updateAvailable: false,
-          message: "Update checks are disabled in development mode",
+          message: "Update checks are disabled until Cosmic Wispr has its own release channel",
         };
       }
 
@@ -197,10 +191,10 @@ class UpdateManager {
 
   async downloadUpdate() {
     try {
-      if (process.env.NODE_ENV === "development") {
+      if (!this.updatesEnabled || process.env.NODE_ENV === "development") {
         return {
           success: false,
-          message: "Update downloads are disabled in development mode",
+          message: "Update downloads are disabled until Cosmic Wispr has its own release channel",
         };
       }
 
@@ -233,10 +227,10 @@ class UpdateManager {
 
   async installUpdate() {
     try {
-      if (process.env.NODE_ENV === "development") {
+      if (!this.updatesEnabled || process.env.NODE_ENV === "development") {
         return {
           success: false,
-          message: "Update installation is disabled in development mode",
+          message: "Update installation is disabled until Cosmic Wispr has its own release channel",
         };
       }
 
@@ -303,6 +297,7 @@ class UpdateManager {
   // Prefs are read at fire time, not scheduling time, so flipping the
   // "App updates" toggle takes effect without a restart (#1605).
   _autoCheckForUpdates(label) {
+    if (!this.updatesEnabled) return;
     if (!appUpdatesEnabled(this.windowManager?.notificationPrefs)) {
       console.log(`⏭️ ${label} update check skipped (app updates disabled)`);
       return;
@@ -314,7 +309,7 @@ class UpdateManager {
   }
 
   checkForUpdatesOnStartup() {
-    if (process.env.NODE_ENV !== "development") {
+    if (this.updatesEnabled && process.env.NODE_ENV !== "development") {
       setTimeout(() => {
         this._autoCheckForUpdates("Startup");
       }, 3000);

@@ -1,10 +1,12 @@
 {
-  "appId": "com.gizmolabs.openwhispr",
+  "appId": "io.github.cosmicwispr.app",
   "afterPack": "scripts/afterPack.js",
-  "productName": "OpenWhispr",
+  "productName": "Cosmic Wispr",
   "protocols": {
-    "name": "OpenWhispr Protocol",
-    "schemes": ["openwhispr"]
+    "name": "Cosmic Wispr Protocol",
+    "schemes": [
+      "cosmic-wispr"
+    ]
   },
   "directories": {
     "output": "dist"
@@ -34,7 +36,6 @@
     "src/components.json",
     "!node_modules/.cache/**/*",
     "!src/node_modules/**/*",
-
     "!**/node_modules/electron/**",
     "!**/node_modules/electron-builder/**",
     "!**/node_modules/app-builder-bin/**",
@@ -42,7 +43,6 @@
     "!**/node_modules/builder-util/**",
     "!**/node_modules/dmg-builder/**",
     "!**/node_modules/7zip-bin/**",
-
     "!**/node_modules/typescript/**",
     "!**/node_modules/prettier/**",
     "!**/node_modules/eslint/**",
@@ -50,20 +50,17 @@
     "!**/node_modules/@eslint/**",
     "!**/node_modules/@typescript-eslint/**",
     "!**/node_modules/globals/**",
-
     "!**/node_modules/vite/**",
     "!**/node_modules/@vitejs/**",
     "!**/node_modules/esbuild/**",
     "!**/node_modules/@esbuild/**",
     "!**/node_modules/rollup/**",
     "!**/node_modules/@rollup/**",
-
     "!**/node_modules/postcss/**",
     "!**/node_modules/autoprefixer/**",
     "!**/node_modules/tailwindcss/**",
     "!**/node_modules/@tailwindcss/**",
     "!**/node_modules/lightningcss*/**",
-
     "!**/node_modules/react/**",
     "!**/node_modules/react-dom/**",
     "!**/node_modules/lucide-react/**",
@@ -74,12 +71,10 @@
     "!**/node_modules/tw-animate-css/**",
     "!**/node_modules/react-markdown/**",
     "!**/node_modules/shadcn-ui/**",
-
     "!**/node_modules/@types/**",
     "!**/node_modules/concurrently/**",
     "!**/node_modules/cross-env/**",
     "!**/node_modules/@electron/notarize/**",
-
     "!**/node_modules/**/test/**",
     "!**/node_modules/**/tests/**",
     "!**/node_modules/**/*.ts",
@@ -145,14 +140,16 @@
   ],
   "mac": {
     "category": "public.app-category.productivity",
-    "target": ["dmg", "zip"],
+    "target": [
+      "dmg",
+      "zip"
+    ],
     "icon": "src/assets/icon.icns",
     "gatekeeperAssess": false,
     "hardenedRuntime": true,
     "entitlements": "resources/mac/entitlements.mac.plist",
     "entitlementsInherit": "resources/mac/entitlements.mac.plist",
-    "identity": "Gizmo Labs Inc. (T832773L2J)",
-    "notarize": true,
+    "notarize": false,
     "extraResources": [
       {
         "from": "src/assets/Assets.car",
@@ -162,22 +159,19 @@
     "extendInfo": {
       "LSUIElement": false,
       "CFBundleIconName": "openwhispr",
-      "NSMicrophoneUsageDescription": "OpenWhispr uses the microphone to capture your voice for transcription.",
-      "NSAudioCaptureUsageDescription": "OpenWhispr uses system audio to capture other participants' audio from calls and meetings.",
-      "NSAccessibilityUsageDescription": "OpenWhispr needs accessibility permissions to paste transcribed text into other applications.",
-      "NSCalendarsUsageDescription": "OpenWhispr reads your calendar to detect upcoming meetings and link meeting notes to events.",
-      "NSCalendarsFullAccessUsageDescription": "OpenWhispr reads your calendar to detect upcoming meetings and link meeting notes to events."
+      "NSMicrophoneUsageDescription": "Cosmic Wispr uses the microphone to capture your voice for transcription.",
+      "NSAudioCaptureUsageDescription": "Cosmic Wispr uses system audio to capture other participants' audio from calls and meetings.",
+      "NSAccessibilityUsageDescription": "Cosmic Wispr needs accessibility permissions to paste transcribed text into other applications.",
+      "NSCalendarsUsageDescription": "Cosmic Wispr reads your calendar to detect upcoming meetings and link meeting notes to events.",
+      "NSCalendarsFullAccessUsageDescription": "Cosmic Wispr reads your calendar to detect upcoming meetings and link meeting notes to events."
     }
   },
   "win": {
-    "target": ["nsis", "portable"],
+    "target": [
+      "nsis",
+      "portable"
+    ],
     "icon": "src/assets/icon.ico",
-    "azureSignOptions": {
-      "endpoint": "https://eus.codesigning.azure.net/",
-      "certificateProfileName": "openwhispr-release",
-      "codeSigningAccountName": "OpenWhispr",
-      "publisherName": "CN=Gizmo Labs Inc., O=Gizmo Labs Inc., L=Wilmington, S=Delaware, C=US"
-    },
     "extraResources": [
       {
         "from": "resources/bin/nircmd.exe",
@@ -186,10 +180,16 @@
     ]
   },
   "linux": {
-    "target": ["AppImage", "deb", "rpm", "tar.gz"],
+    "target": [
+      "AppImage",
+      "deb",
+      "rpm",
+      "tar.gz"
+    ],
     "icon": "src/assets/icon.png",
     "category": "Utility",
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "executableName": "cosmic-wispr"
   },
   "flatpak": {
     "runtime": "org.freedesktop.Platform",
@@ -213,7 +213,10 @@
   "deb": {
     "afterInstall": "resources/linux/after-install.sh",
     "afterRemove": "resources/linux/after-remove.sh",
-    "depends": ["ydotool", "libpipewire-0.3-0"],
+    "depends": [
+      "ydotool",
+      "libpipewire-0.3-0"
+    ],
     "fpm": [
       "--deb-recommends",
       "ydotoold",
@@ -259,18 +262,12 @@
     "include": "resources/nsis/installer.nsh"
   },
   "dmg": {
-    "title": "OpenWhispr",
+    "title": "Cosmic Wispr",
     "icon": "src/assets/icon.icns",
     "window": {
       "width": 540,
       "height": 380
     }
   },
-  "publish": {
-    "provider": "github",
-    "owner": "OpenWhispr",
-    "repo": "openwhispr",
-    "private": false,
-    "releaseType": "draft"
-  }
+  "publish": null
 }

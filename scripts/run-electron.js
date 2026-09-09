@@ -64,6 +64,7 @@ if (shouldForceXWayland(args)) {
 
 // Chromium flags must come before the app path, app args after.
 const chromiumFlags = args.filter((a) => a.startsWith(OZONE_PLATFORM_PREFIX));
+if (process.platform === "linux") chromiumFlags.push("--class=cosmic-wispr");
 // Dev-only: OW_DEBUG_CDP=<port> exposes the Chrome DevTools Protocol so tools
 // can inspect the renderers (used for animation/window diagnostics).
 if (process.env.OW_DEBUG_CDP) {

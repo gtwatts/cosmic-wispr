@@ -114,7 +114,19 @@ class ClipboardManager {
   }
 
   _writeClipboardWayland(text, webContents) {
-    const { isKde } = getLinuxSessionInfo();
+    const { isKde, isCosmic } = getLinuxSessionInfo();
+
+    if (isCosmic && this.commandExists("wl-copy")) {
+      // wl-copy owns the native Wayland selection. Rewriting it through
+      // Electron/XWayland immediately afterwards clears it on COSMIC.
+      // Ignore inherited output pipes so its clipboard-serving child can live.
+      const result = spawnSync("wl-copy", ["--type", "text/plain;charset=utf-8"], {
+        input: text,
+        stdio: ["pipe", "ignore", "ignore"],
+        timeout: 1000,
+      });
+      if (result.status === 0) return;
+    }
 
     // On KDE with XWayland, write to X11 clipboard directly because
     // wl-copy targets the Wayland clipboard which is desynced from X11
@@ -173,7 +185,16 @@ class ClipboardManager {
   _writePrimarySelection(text) {
     if (process.platform !== "linux") return;
 
-    const { isWayland } = getLinuxSessionInfo();
+    const { isWayland, isCosmic } = getLinuxSessionInfo();
+
+    if (isCosmic && this.commandExists("wl-copy")) {
+      const result = spawnSync("wl-copy", ["--primary", "--type", "text/plain;charset=utf-8"], {
+        input: text,
+        stdio: ["pipe", "ignore", "ignore"],
+        timeout: 1000,
+      });
+      if (result.status === 0) return;
+    }
 
     if (isWayland && this.commandExists("wl-copy")) {
       try {

@@ -43,11 +43,11 @@ try {
 
 const VALID_CHANNELS = new Set(["development", "staging", "production"]);
 const DEFAULT_OAUTH_PROTOCOL_BY_CHANNEL = {
-  development: "openwhispr-dev",
-  staging: "openwhispr-staging",
-  production: "openwhispr",
+  development: "cosmic-wispr-dev",
+  staging: "cosmic-wispr-staging",
+  production: "cosmic-wispr",
 };
-const BASE_WINDOWS_APP_ID = "com.gizmolabs.openwhispr";
+const BASE_WINDOWS_APP_ID = "io.github.cosmicwispr.app";
 const DEFAULT_AUTH_BRIDGE_PORT = 5199;
 
 function isElectronBinaryExec() {
@@ -82,11 +82,9 @@ const APP_CHANNEL = resolveAppChannel();
 process.env.OPENWHISPR_CHANNEL = APP_CHANNEL;
 
 function configureChannelUserDataPath() {
-  if (APP_CHANNEL === "production") {
-    return;
-  }
-
-  const isolatedPath = path.join(app.getPath("appData"), `OpenWhispr-${APP_CHANNEL}`);
+  app.setName("Cosmic Wispr");
+  const suffix = APP_CHANNEL === "production" ? "" : `-${APP_CHANNEL}`;
+  const isolatedPath = path.join(app.getPath("appData"), `cosmic-wispr${suffix}`);
   app.setPath("userData", isolatedPath);
 }
 
@@ -124,7 +122,7 @@ if (process.platform === "linux" && process.env.XDG_SESSION_TYPE === "wayland") 
 // Set desktop filename so Wayland compositors can match windows to the .desktop entry.
 // This allows XDG portals (e.g. PipeWire) to persist permissions across sessions.
 if (process.platform === "linux") {
-  app.setDesktopName("open-whispr.desktop");
+  app.setDesktopName("cosmic-wispr.desktop");
 }
 
 // Group all windows under single taskbar entry on Windows
@@ -243,8 +241,8 @@ if (!gotSingleInstanceLock) {
 const isLiveWindow = (window) => window && !window.isDestroyed();
 
 // Ensure macOS menus use the proper casing for the app name
-if (process.platform === "darwin" && app.getName() !== "OpenWhispr") {
-  app.setName("OpenWhispr");
+if (process.platform === "darwin" && app.getName() !== "Cosmic Wispr") {
+  app.setName("Cosmic Wispr");
 }
 
 // Add global error handling for uncaught exceptions

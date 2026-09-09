@@ -90,6 +90,13 @@ async function ensureYdotool() {
   const sessionType = (process.env.XDG_SESSION_TYPE || "").toLowerCase();
   if (sessionType !== "wayland" && !process.env.WAYLAND_DISPLAY) return;
 
+  // COSMIC can use our native helper directly with the session's uinput ACL.
+  // A ydotool daemon and keyboard input-group membership are unnecessary.
+  if (getLinuxSessionInfo().isCosmic && isUinputAccessible()) {
+    const ClipboardManager = require("./clipboard");
+    if (new ClipboardManager().resolveLinuxFastPasteBinary()) return;
+  }
+
   const log = getLogger();
 
   const hasYdotool = commandExists("ydotool");

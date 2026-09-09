@@ -1,124 +1,60 @@
-<p align="center">
-  <img src="src/assets/logo.svg" alt="OpenWhispr" width="120" />
-</p>
+# Cosmic Wispr
 
-<h1 align="center">OpenWhispr</h1>
+Local-first AI voice dictation for the **COSMIC desktop on Linux**, built from [OpenWhispr](https://github.com/OpenWhispr/openwhispr) 1.10.0.
 
-<p align="center">
-  <a href="https://github.com/OpenWhispr/openwhispr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/OpenWhispr/openwhispr?style=flat" alt="License" /></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey?style=flat" alt="Platform" />
-  <a href="https://github.com/OpenWhispr/openwhispr/releases/latest"><img src="https://img.shields.io/github/v/release/OpenWhispr/openwhispr?style=flat&sort=semver" alt="GitHub release" /></a>
-  <a href="https://github.com/OpenWhispr/openwhispr/releases"><img src="https://img.shields.io/github/downloads/OpenWhispr/openwhispr/total?style=flat&color=blue" alt="Downloads" /></a>
-  <a href="https://github.com/OpenWhispr/openwhispr/stargazers"><img src="https://img.shields.io/github/stars/OpenWhispr/openwhispr?style=flat" alt="GitHub stars" /></a>
-</p>
+Click a text field in your application, press **Ctrl+Alt+Space**, speak, and press the shortcut again. Cosmic Wispr transcribes your speech, optionally cleans it up with an AI model, and pastes the result into the focused application.
 
-<p align="center">
-  The open-source and free alternative to WisprFlow and Granola.<br/>
-  Privacy-first voice-to-text dictation with AI agents, meeting transcription, and notes. Cross-platform for macOS, Windows, and Linux.
-</p>
+This is an independent MIT-licensed fork. It is not affiliated with System76, Wispr Flow, or the OpenWhispr cloud service. Upstream copyright and license notices are retained in [LICENSE](LICENSE); the original documentation is in [docs/UPSTREAM_README.md](docs/UPSTREAM_README.md).
 
-<p align="center">
-  <a href="https://openwhispr.com">Website</a> &middot;
-  <a href="https://docs.openwhispr.com">Docs</a> &middot;
-  <a href="https://github.com/OpenWhispr/openwhispr/releases/latest">Download</a> &middot;
-  <a href="https://docs.openwhispr.com/api/overview">API</a> &middot;
-  <a href="https://github.com/OpenWhispr/openwhispr/blob/main/CHANGELOG.md">Changelog</a>
-</p>
+![Cosmic Wispr desktop interface](docs/images/cosmic-wispr.png)
 
----
+See [workstation validation](docs/COSMIC_VALIDATION.md) for the tested scope.
 
-OpenWhispr turns your voice into text, notes, and actions from your desktop. Press a hotkey, speak, and your words appear at your cursor. Choose between fully private offline transcription with local speech-to-text engines like Whisper and NVIDIA Parakeet — where your audio never leaves your device — or cloud processing for speed. No data collection, no telemetry, fully open source.
+## COSMIC integration
 
-## Download
+- Native COSMIC custom shortcuts dispatch to a session D-Bus service. Shortcuts work across Wayland and XWayland applications without a global key listener.
+- **Ctrl+Alt+Space** defaults to tap once to record, tap again to finish. Change it in Settings. Hold-to-talk is unavailable through COSMIC custom shortcuts because they do not report key release.
+- Existing desktop shortcut conflicts are reported. The app preserves unrelated bindings and backs up an existing custom shortcut file before its first change. Closing the app removes its own bindings.
+- A focusless recording overlay keeps the destination application active. Native Linux input injection pastes clipboard text into that application.
+- The desktop launcher is named **Cosmic Wispr**. The existing assistant, translation, and meeting features remain available; assign their optional shortcuts in Settings.
 
-| Platform              | Download                                                                                                                                                                                                                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| macOS (Apple Silicon) | [`.dmg`](https://github.com/OpenWhispr/openwhispr/releases/latest)                                                                                                                                                                                                                        |
-| macOS (Intel) \*      | [`.dmg`](https://github.com/OpenWhispr/openwhispr/releases/latest)                                                                                                                                                                                                                        |
-| Windows               | [`.exe`](https://github.com/OpenWhispr/openwhispr/releases/latest)                                                                                                                                                                                                                        |
-| Linux                 | [`.AppImage`](https://github.com/OpenWhispr/openwhispr/releases/latest) / [`.deb`](https://github.com/OpenWhispr/openwhispr/releases/latest) / [`.rpm`](https://github.com/OpenWhispr/openwhispr/releases/latest) / [`.tar.gz`](https://github.com/OpenWhispr/openwhispr/releases/latest) |
+Applications must have an editable, focused field and accept clipboard paste. Protected fields, remote sessions, and applications with unusual paste behavior may require manual paste. This fork does not promise compatibility with every application.
 
-\* On Intel Macs, live speaker identification and voice fingerprinting are unavailable: they depend on ONNX Runtime, which [stopped shipping macOS x86_64 binaries in 1.24](https://github.com/microsoft/onnxruntime/releases/tag/v1.24.1). Meetings still record and transcribe normally, and notes search falls back to keyword matching instead of semantic search.
+## Run from this checkout
 
-## Features
+Use Node.js 24 or newer. On Debian/Ubuntu, native helper compilation needs a C/C++ compiler and X11/XTest development headers (`build-essential`, `libx11-dev`, `libxtst-dev`). Install `wl-clipboard` for native Wayland clipboard support.
 
-- **Voice dictation** — global hotkey to dictate into any app with automatic pasting
-- **Dictation translation** — dedicated hotkey to dictate in one language and paste the text in another
-- **AI agent** — talk to GPT-5, Claude, Gemini, Groq, Tinfoil, OpenRouter, or local models with a named voice assistant
-- **Voice Assistant hotkey** — dedicated hotkey that sends what you say straight to your AI assistant as a command, no wake word needed and no cleanup pass; highlighted text is edited in place. With auto-paste enabled, answers paste at a focused text cursor or stream into a floating panel and copy to the clipboard when no writable cursor is available. You can also opt in to sending a screenshot of your current screen as context
-- **Meeting transcription** — auto-detect Zoom, Teams, and FaceTime calls with live speaker diarization, voice fingerprinting, and Google, Microsoft, or Apple Calendar integration
-- **Local speaker diarization** — on-device speaker labelling with voice fingerprint recognition across meetings, no cloud required
-- **Notes** — create, organize, and search notes with folders, semantic search, cloud sync, and AI actions
-- **Team spaces & sharing** — free for signed-in users; share notes on the web with link, domain, or invite-only visibility, and collaborate in team spaces with roles, invitations, and server-enforced membership
-- **Audio import** — transcribe existing audio and video: drag in files, batch-upload, or paste a YouTube/audio URL, with optional speaker detection
-- **Local or cloud — your choice** — all core features (transcription, AI reasoning, speaker diarization, semantic search) work with local models or cloud providers — including GPU-accelerated local Whisper on Metal, CUDA, and Vulkan (AMD/Intel)
-- **Enterprise controls** — enforce organization policy, company SSO and SCIM, and centrally managed Amazon Bedrock or Azure OpenAI access without distributing cloud keys
-- **Public API & MCP** — manage notes and transcriptions programmatically or connect your AI assistant via the [MCP server](https://docs.openwhispr.com/integrations/mcp)
-
-## Quick start
-
-```bash
-git clone https://github.com/OpenWhispr/openwhispr.git
-cd openwhispr
-npm install
-npm run dev
+```sh
+npm ci
+npm run compile:linux-paste
+npm run download:whisper-cpp
+npm run download:llama-server
+npm run build:renderer
+npm run install:cosmic
+npm run start:cosmic
 ```
 
-Requires Node.js 24+. See the [full documentation](https://docs.openwhispr.com/quickstart) for setup guides, platform-specific instructions, and build details.
+The installer writes a launcher in `~/.local/bin` and a desktop entry in your user application directory. It points to this checkout and the current Node executable: keep both in place. This is a source installation, not a standalone release package. No administrator privileges or login-group changes are made by the installer.
 
-## Documentation
+For automatic paste on native Wayland, the native helper needs write access to `/dev/uinput`. The app also retains upstream paste fallbacks. Access policy is distribution-specific; do not make the device world-writable. Ctrl+Alt+Space itself does not require input-device access.
 
-Visit **[docs.openwhispr.com](https://docs.openwhispr.com)** for:
+Choose local setup during onboarding, download a speech model, and optionally select a local cleanup model. Whisper Base and Qwen3.5 2B Q4 are a small starting configuration. Models download separately from the inference executables above. Larger models trade memory and latency for quality. Upstream provider choices remain available, but its hosted account service requires a separately configured cloud backend.
 
-- [Getting started](https://docs.openwhispr.com/quickstart)
-- [Platform guides](https://docs.openwhispr.com/platform/macos) (macOS, Windows, Linux)
-- [API reference](https://docs.openwhispr.com/api/overview)
-- [MCP server setup](https://docs.openwhispr.com/integrations/mcp)
-- [Troubleshooting](https://docs.openwhispr.com/troubleshooting)
+## Fork boundaries
 
-Repo examples:
+Cosmic Wispr stores its production settings in `~/.config/cosmic-wispr`, model cache in `~/.cache/cosmic-wispr`, keyring entry under `Cosmic Wispr`, and CLI bridge descriptor in `~/.cosmic-wispr`. `COSMIC_WISPR_CACHE_ROOT` can override the default model cache. Development channels use separate settings directories.
 
-- [Custom ASR shim](examples/custom-asr-shim/) for Self-Hosted transcription against non-OpenAI-compatible ASR APIs
+Automatic application updates are disabled until this fork has its own release feed. The packaging configuration contains no upstream publishing destination or signing credentials. Original internal module names and service names remain where changing them would break upstream compatibility.
 
-## Tech stack
+COSMIC shortcut handling follows the [COSMIC settings daemon binding format](https://github.com/pop-os/cosmic-settings-daemon/blob/master/config/src/shortcuts/binding.rs). Unsupported configuration syntax is rejected instead of overwritten.
 
-React 19, TypeScript, Tailwind CSS v4, Electron 41, better-sqlite3, whisper.cpp, sherpa-onnx, shadcn/ui
+## Development checks
 
-## Star History
+```sh
+npm run test:desktop
+npm run lint
+npm run typecheck
+npm run build:renderer
+```
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenWhispr/openwhispr&type=date&legend=top-left)](https://www.star-history.com/#OpenWhispr/openwhispr&type=date&legend=top-left)
-
-## Sponsors
-
-<p align="center">
-  <a href="https://console.neon.tech/app/?promo=openwhispr">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://neon.com/brand/neon-logo-dark-color.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://neon.com/brand/neon-logo-light-color.svg">
-      <img width="250" alt="Neon" src="https://neon.com/brand/neon-logo-light-color.svg">
-    </picture>
-  </a>
-</p>
-
-<p align="center"><a href="https://console.neon.tech/app/?promo=openwhispr">Neon</a> is the serverless Postgres platform powering OpenWhispr Cloud.</p>
-
-## Contributing
-
-We welcome contributions. Fork the repo, create a feature branch, and open a pull request. See the [contributing guide](https://docs.openwhispr.com/contributing) for development setup and guidelines.
-
-## License
-
-[MIT](LICENSE) — free for personal and commercial use.
-
-## Acknowledgments
-
-- **[OpenAI Whisper](https://github.com/openai/whisper)** — speech recognition model powering local and cloud transcription
-- **[whisper.cpp](https://github.com/ggerganov/whisper.cpp)** — high-performance C++ implementation for local processing
-- **[NVIDIA Parakeet](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)** — fast multilingual ASR model
-- **[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)** — cross-platform ONNX runtime for Parakeet inference
-- **[Hugging Face](https://huggingface.co/)** — model hub hosting Whisper, Parakeet, and embedding model weights
-- **[llama.cpp](https://github.com/ggerganov/llama.cpp)** — local LLM inference for AI text processing
-- **[Electron](https://www.electronjs.org/)** — cross-platform desktop framework
-- **[React](https://react.dev/)** — UI component library
-- **[shadcn/ui](https://ui.shadcn.com/)** — accessible components built on Radix primitives
-- **[Neon](https://console.neon.tech/app/?promo=openwhispr)** — serverless Postgres powering OpenWhispr Cloud
+`test:desktop` runs the Node test runner with Electron's Node runtime, matching the native SQLite module installed by `npm ci`. `npm test` remains available for environments that build native dependencies for standalone Node.
