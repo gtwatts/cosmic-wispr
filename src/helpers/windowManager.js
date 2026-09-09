@@ -932,6 +932,9 @@ class WindowManager {
       return;
     }
 
+    if (nextState === DICTATION_LIFECYCLE.IDLE || nextState === DICTATION_LIFECYCLE.PROCESSING) {
+      this.cosmicGestureManager?.gesture.recordingEnded();
+    }
     this._dictationLifecycleState = nextState;
     this._dictationInputKind = nextInputKind;
     this._isDictatingToggle = isDictationRecording(nextState);

@@ -599,6 +599,17 @@ class WhisperServerManager extends EventEmitter {
     // Select GPU by UUID + PCI_BUS_ID order so the device is unambiguous. See #531.
     if (usingCuda) {
       spawnEnv.CUDA_DEVICE_ORDER = "PCI_BUS_ID";
+      // Linux CUDA packs can use an existing CUDA runtime without changing the
+      // desktop's global library path (for example, a local Ollama installation).
+      if (process.platform === "linux") {
+        spawnEnv.LD_LIBRARY_PATH = [
+          serverBinaryDir,
+          process.env.WHISPER_CUDA_LIBRARY_PATH,
+          process.env.LD_LIBRARY_PATH,
+        ]
+          .filter(Boolean)
+          .join(":");
+      }
       if (process.env.TRANSCRIPTION_GPU_UUID) {
         spawnEnv.CUDA_VISIBLE_DEVICES = process.env.TRANSCRIPTION_GPU_UUID;
       }

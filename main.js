@@ -278,6 +278,7 @@ const GlobeKeyManager = require("./src/helpers/globeKeyManager");
 const DevServerManager = require("./src/helpers/devServerManager");
 const WindowsKeyManager = require("./src/helpers/windowsKeyManager");
 const LinuxKeyManager = require("./src/helpers/linuxKeyManager");
+const CosmicGestureManager = require("./src/helpers/cosmicGestureManager");
 const TextEditMonitor = require("./src/helpers/textEditMonitor");
 const SelectionManager = require("./src/helpers/selectionManager");
 const WhisperCudaManager = require("./src/helpers/whisperCudaManager");
@@ -526,6 +527,7 @@ function initializeCoreManagers() {
   windowManager.selectionManager = selectionManager;
   windowManager.windowsKeyManager = windowsKeyManager;
   windowManager.linuxKeyManager = linuxKeyManager;
+  windowManager.cosmicGestureManager = new CosmicGestureManager(windowManager);
 
   // IPC handlers must be registered before window content loads
   ipcHandlers = new IPCHandlers({
@@ -1743,6 +1745,8 @@ async function startApp() {
       });
     }
 
+    windowManager.cosmicGestureManager?.start();
+
     const STARTUP_DELAY_MS = 3000;
     setTimeout(() => windowManager.reconcileNativeKeyListeners(), STARTUP_DELAY_MS);
 
@@ -1932,6 +1936,7 @@ function performSyncTeardown() {
   if (globeKeyManager) globeKeyManager.stop();
   if (windowsKeyManager) windowsKeyManager.stop();
   if (linuxKeyManager) linuxKeyManager.stop();
+  windowManager?.cosmicGestureManager?.stop();
   if (meetingDetectionEngine) meetingDetectionEngine.stop();
   if (googleCalendarManager) googleCalendarManager.stop();
   if (microsoftCalendarManager) microsoftCalendarManager.stop();

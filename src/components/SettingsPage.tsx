@@ -1,3 +1,4 @@
+import CosmicRightCtrlSettings from "./CosmicRightCtrlSettings";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
@@ -3919,6 +3920,7 @@ EOF`,
       case "hotkeys":
         return (
           <div className="space-y-6">
+            <CosmicRightCtrlSettings />
             {isUsingHyprland && hyprlandConfigStatus && !hyprlandConfigStatus.canWrite && (
               <Alert>
                 <Info className="h-4 w-4" />

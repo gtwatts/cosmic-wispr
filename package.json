@@ -81,7 +81,10 @@
     "clean": "node cleanup.js",
     "start:cosmic": "node scripts/start-cosmic.js",
     "install:cosmic": "node scripts/install-cosmic.js",
-    "test:desktop": "node scripts/test-desktop.js"
+    "test:desktop": "node scripts/test-desktop.js",
+    "compile:cosmic-keys": "node scripts/build-cosmic-keys.js",
+    "install:cosmic-keys": "node scripts/setup-cosmic-keys.js",
+    "test:cosmic-keys": "node scripts/test-cosmic-keys.js"
   },
   "keywords": [
     "dictation",

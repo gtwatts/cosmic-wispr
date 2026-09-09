@@ -503,6 +503,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cleanupApp: () => ipcRenderer.invoke("cleanup-app"),
   updateHotkey: (hotkey) => ipcRenderer.invoke("update-hotkey", hotkey),
   setHotkeyListeningMode: (enabled) => ipcRenderer.invoke("set-hotkey-listening-mode", enabled),
+  getCosmicGestureStatus: () => ipcRenderer.invoke("get-cosmic-gesture-status"),
+  setCosmicGestureEnabled: (enabled) => ipcRenderer.invoke("set-cosmic-gesture-enabled", enabled),
   getHotkeyModeInfo: (hotkey) => ipcRenderer.invoke("get-hotkey-mode-info", hotkey),
   getHyprlandConfigStatus: () => ipcRenderer.invoke("get-hyprland-config-status"),
   startWindowDrag: () => ipcRenderer.invoke("start-window-drag"),

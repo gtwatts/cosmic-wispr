@@ -1,0 +1,26 @@
+[Unit]
+Description=Cosmic Wispr filtered keyboard listener
+
+[Service]
+ExecStart=/usr/local/libexec/cosmic-wispr/right-ctrl
+StandardInput=socket
+StandardOutput=inherit
+StandardError=journal
+DynamicUser=yes
+SupplementaryGroups=input
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+DevicePolicy=closed
+DeviceAllow=char-input r
+UMask=0077
+TimeoutStopSec=3

@@ -207,6 +207,11 @@ class LlamaServerManager {
 
   async _startWithGpuFallback(binaryPaths, baseArgs, options, draftArgs = []) {
     const gpuArgs = [...baseArgs, "--n-gpu-layers", String(options.gpuLayers ?? 99)];
+    // Keep local cleanup on the selected discrete GPU on hybrid laptops.
+    // Vulkan device names come from llama-server --list-devices.
+    if (/^Vulkan\d+$/.test(process.env.LLAMA_VULKAN_DEVICE || "")) {
+      gpuArgs.push("--device", process.env.LLAMA_VULKAN_DEVICE);
+    }
     const cpuArgs = baseArgs;
     const hasDraft = draftArgs.length > 0;
 

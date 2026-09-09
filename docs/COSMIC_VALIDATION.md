@@ -2,6 +2,8 @@
 
 Validated September 9, 2026, on a COSMIC Wayland session with XWayland available. This records the first functional fork; it is not a certification of every application or distribution.
 
+Later the same day, [Right Ctrl hold and hands-free dictation](RIGHT_CTRL.md) and [GPU transcription](FAST_TRANSCRIPTION.md) were implemented and checked. Those follow-up reports supersede the initial hold/GPU limitations and model selection below.
+
 ## Checks
 
 - Electron-runtime test suite: **3,767 passed, 0 failed**, 23 skipped and 1 todo (3,791 total).
@@ -21,4 +23,4 @@ Validated September 9, 2026, on a COSMIC Wayland session with XWayland available
 
 ## Remaining boundaries
 
-Hold-to-talk is disabled on COSMIC. Optional cloud account integration, GPU inference, packaged releases, automatic updates, and every target application have not been validated by this check. The installed launcher runs from the source checkout. Existing upstream model download sources and original icon artwork remain in use.
+At this initial checkpoint, hold-to-talk and GPU inference had not been validated. Optional cloud account integration, packaged releases, automatic updates, and every target application remain outside this check. The installed launcher runs from the source checkout. Existing upstream model download sources and original icon artwork remain in use.

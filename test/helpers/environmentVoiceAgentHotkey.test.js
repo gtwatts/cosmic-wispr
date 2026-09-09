@@ -146,3 +146,25 @@ test("device cleanup clears persisted settings and encrypted secret files", asyn
   assert.equal(fs.existsSync(path.join(userDataDirectory, ".env")), false);
   assert.equal(fs.existsSync(secureKeysDirectory), false);
 });
+
+test("startup preference saves retain workstation GPU runtime settings", async (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "cosmic-wispr-gpu-env-"));
+  const keys = ["WHISPER_CUDA_LIBRARY_PATH", "LLAMA_VULKAN_DEVICE"];
+  const previous = keys.map((key) => process.env[key]);
+  t.after(() => {
+    keys.forEach((key, i) => {
+      if (previous[i] === undefined) delete process.env[key];
+      else process.env[key] = previous[i];
+    });
+    fs.rmSync(directory, { recursive: true, force: true });
+  });
+  installDotenvStub(t);
+  const EnvironmentManager = loadEnvironmentManager(t, directory);
+  const manager = new EnvironmentManager();
+  process.env.WHISPER_CUDA_LIBRARY_PATH = "/opt/local-cuda/lib";
+  process.env.LLAMA_VULKAN_DEVICE = "Vulkan1";
+  await manager.saveAllKeysToEnvFile();
+  const saved = fs.readFileSync(path.join(directory, ".env"), "utf8");
+  assert.match(saved, /^WHISPER_CUDA_LIBRARY_PATH=\/opt\/local-cuda\/lib$/m);
+  assert.match(saved, /^LLAMA_VULKAN_DEVICE=Vulkan1$/m);
+});

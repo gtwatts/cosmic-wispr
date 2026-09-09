@@ -193,6 +193,27 @@ function makeLadderManager(shouldFail) {
 
 const LADDER_BINARIES = { vulkan: "/bin/vulkan", cpu: "/bin/cpu" };
 
+test("a selected Vulkan device does not leak into the CPU fallback", async (t) => {
+  const previous = process.env.LLAMA_VULKAN_DEVICE;
+  process.env.LLAMA_VULKAN_DEVICE = "Vulkan1";
+  t.after(() => {
+    if (previous === undefined) delete process.env.LLAMA_VULKAN_DEVICE;
+    else process.env.LLAMA_VULKAN_DEVICE = previous;
+  });
+  const { manager } = makeLadderManager(() => false);
+  const attempts = [];
+  manager._startWithBinary = async (binary, args) => {
+    attempts.push({ binary, args });
+    if (binary === LADDER_BINARIES.vulkan) throw new Error("GPU unavailable");
+  };
+  await manager._startWithGpuFallback(LADDER_BINARIES, LADDER_BASE_ARGS, {}, []);
+  assert.equal(attempts.length, 2);
+  const gpuArgs = attempts[0].args;
+  assert.equal(gpuArgs[gpuArgs.indexOf("--device") + 1], "Vulkan1");
+  assert.equal(attempts[1].args.includes("--device"), false);
+  assert.equal(manager.activeBackend, "cpu");
+});
+
 test("degrade ladder attempts GPU+MTP, GPU, CPU+MTP, CPU in that order", async () => {
   const { manager, attempts } = makeLadderManager(() => true);
   await assert.rejects(() =>

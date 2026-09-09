@@ -4046,6 +4046,14 @@ class IPCHandlers {
       return { success: true };
     });
 
+    ipcMain.handle(
+      "get-cosmic-gesture-status",
+      () => this.windowManager.cosmicGestureManager?.status() || { supported: false }
+    );
+    ipcMain.handle("set-cosmic-gesture-enabled", (_event, enabled) =>
+      this.windowManager.cosmicGestureManager?.setEnabled(enabled)
+    );
+
     ipcMain.handle("get-hotkey-mode-info", async (_event, requestedHotkey) => {
       const hotkeyManager = this.windowManager.hotkeyManager;
       const hotkey =
